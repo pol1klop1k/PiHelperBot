@@ -1,12 +1,12 @@
 from aiogram import Bot, Dispatcher, executor, types
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery
+from aiogram.types import  CallbackQuery
+from aiogram.dispatcher.middlewares import BaseMiddleware
 import config
 import os
+from keyboards import *
 
 #env vars
 TOKEN = os.getenv('TEST_BOT_TOKEN')
-
-
 
 bot = Bot(TOKEN)
 dp = Dispatcher(bot)
@@ -37,59 +37,47 @@ async def start_command(message: types.Message):
     text='Информатика',
     )
 
-    #functional = ReplyKeyboardMarkup(
-    #resize_keyboard=True,
-    #)
-
     functional = ReplyKeyboardMarkup(
     resize_keyboard=True,
     )
 
     await message.answer(text='Вот список моих некоторых комманд', reply_markup=functional.row(history, informatic))
 
+#@dp.message_handler(lambda message: message.text in config.objects)
+async def answer_or_question(message: types.Message):
 
-@dp.message_handler(lambda message: message.text=='История')
-async def history(message: types.Message):
-
-    ikb = InlineKeyboardMarkup(row_width=5)
-    count = 57
-    a = iter(range(1,count+1))
-    for i in range(count//5+1):
-        butts = []
-        for k in a:
-            current = str(k)
-            butts.append(InlineKeyboardButton(text=current, callback_data=current))
-            if k % 5 == 0:
-                break
-        ikb.row(*butts)
-
-
-    await message.answer(
-    text='Какой вопрос по истории интересует?',
-    reply_markup=ikb,
+    question = InlineKeyboardButton(
+    text='Вопросы',
+    callback_data=f'Вопросы {message.text}',
     )
 
-
-@dp.message_handler(lambda message: message.text=='Информатика')
-async def informatic(message: types.Message):
-
-    ikb = InlineKeyboardMarkup(row_width=5)
-    count = 77
-    a = iter(range(1,count+1))
-    for i in range(count//5+1):
-        butts = []
-        for k in a:
-            current = str(k)
-            butts.append(InlineKeyboardButton(text=current, callback_data=current))
-            if k % 5 == 0:
-                break
-        ikb.row(*butts)
-
-    await message.answer(
-    text='Какой вопрос по информатике интересует?',
-    reply_markup=ikb,
+    answer = InlineKeyboardButton(
+    text='Ответы',
+    callback_data=f'Ответы {message.text}',
     )
 
+    aoq = InlineKeyboardMarkup(
+    row_width=2
+    ).row(question, answer)
+
+    await message.answer(
+    text='Вам нужны вопросы или ответы?',
+    reply_markup=aoq,
+    )
+
+@dp.message_handler(lambda message: message.text in config.objects)
+async def choose_answer(message: types.Message):
+
+    obj = message.text
+    text = f'Какой вопрос по {config.declination[obj]} интересует?'
+
+
+    ikb = AnswerKeyboard(57)
+
+    await message.answer(
+    text=text,
+    reply_markup=ikb.markup,
+    )
 
 
 if __name__ == '__main__':
