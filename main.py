@@ -29,56 +29,30 @@ async def start_command(message: types.Message):
     await message.delete()
     await message.answer(text="Привет! Я бот помощник по учебному процессу")
 
-    history = KeyboardButton(
-    text='История',
-    )
+    functional = SubjectsReplyKeyboard(config.subjects, resize_keyboard=True,one_time_keyboard=False)
+    functional.make_buttons()
 
-    informatic = KeyboardButton(
-    text='Информатика',
-    )
+    await message.answer(text='Вот список моих некоторых комманд', reply_markup=functional)
 
-    functional = ReplyKeyboardMarkup(
-    resize_keyboard=True,
-    )
 
-    await message.answer(text='Вот список моих некоторых комманд', reply_markup=functional.row(history, informatic))
-
-#@dp.message_handler(lambda message: message.text in config.objects)
-async def answer_or_question(message: types.Message):
-
-    question = InlineKeyboardButton(
-    text='Вопросы',
-    callback_data=f'Вопросы {message.text}',
-    )
-
-    answer = InlineKeyboardButton(
-    text='Ответы',
-    callback_data=f'Ответы {message.text}',
-    )
-
-    aoq = InlineKeyboardMarkup(
-    row_width=2
-    ).row(question, answer)
-
-    await message.answer(
-    text='Вам нужны вопросы или ответы?',
-    reply_markup=aoq,
-    )
-
-@dp.message_handler(lambda message: message.text in config.objects)
+@dp.message_handler(lambda message: message.text in config.subjects)
 async def choose_answer(message: types.Message):
 
     obj = message.text
     text = f'Какой вопрос по {config.declination[obj]} интересует?'
 
 
-    ikb = AnswerKeyboard(57)
+    ikb = AnswerInlineKeyboard(5, 57)
+    ikb.make_buttons()
 
     await message.answer(
     text=text,
-    reply_markup=ikb.markup,
+    reply_markup=ikb,
     )
 
+@dp.callback_query_handler()
+async def answer(callback: CallbackQuery):
+    await callback.answer(text=callback.data)
 
 if __name__ == '__main__':
     executor.start_polling(
