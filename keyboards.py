@@ -3,7 +3,7 @@ import config
 
 class AnswerInlineKeyboard(InlineKeyboardMarkup):
 
-    def __init__(self, row_width, count):
+    def __init__(self, row_width, count, subject):
         self.count = count
         super().__init__(self, row_width)
 

@@ -4,6 +4,7 @@ from aiogram.dispatcher.middlewares import BaseMiddleware
 import config
 import os
 from keyboards import *
+import info
 
 #env vars
 TOKEN = os.getenv('TEST_BOT_TOKEN')
@@ -38,17 +39,23 @@ async def start_command(message: types.Message):
 @dp.message_handler(lambda message: message.text in config.subjects)
 async def choose_answer(message: types.Message):
 
-    obj = message.text
-    text = f'Какой вопрос по {config.declination[obj]} интересует?'
+    subj = message.text
+    questions = info.get_questions(subj)
 
+    text = f'Какой вопрос по {config.declination[subj]} интересует?\n'
 
-    ikb = AnswerInlineKeyboard(5, 57)
+    ikb = AnswerInlineKeyboard(5, 57, subj)
     ikb.make_buttons()
 
     await message.answer(
     text=text,
     reply_markup=ikb,
     )
+
+    paragraphs = [f'{id}. {text}' for id, text in questions]
+
+    for paragraph in paragraphs:
+        await bot.send_message(chat_id=message.from_user.id, text=paragraph)
 
 @dp.callback_query_handler()
 async def answer(callback: CallbackQuery):
