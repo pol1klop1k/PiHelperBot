@@ -44,18 +44,21 @@ async def choose_answer(message: types.Message):
 
     text = f'Какой вопрос по {config.declination[subj]} интересует?\n'
 
+    await message.answer(text = text)
+
     ikb = AnswerInlineKeyboard(5, 57, subj)
     ikb.make_buttons()
 
-    await message.answer(
-    text=text,
-    reply_markup=ikb,
-    )
+    #paragraphs = [f'{id}. {text}' for id, text in questions]
 
-    paragraphs = [f'{id}. {text}' for id, text in questions]
-
-    for paragraph in paragraphs:
-        await bot.send_message(chat_id=message.from_user.id, text=paragraph)
+    for paragraph in questions:
+        question_id, question_text = paragraph
+        button = InlineKeyboardButton(text="Получить ответ", callback_data=str(question_id))
+        ikb = InlineKeyboardMarkup(row_width=1).add(button)
+        await bot.send_message(
+            chat_id=message.from_user.id, 
+            text=f'{question_id}. {question_text}',
+            reply_markup=ikb)
 
 @dp.callback_query_handler()
 async def answer(callback: CallbackQuery):
