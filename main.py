@@ -1,6 +1,5 @@
 from aiogram import Bot, Dispatcher, executor, types
 from aiogram.types import  CallbackQuery
-from aiogram.dispatcher.middlewares import BaseMiddleware
 import config
 import os
 from keyboards import *
@@ -57,9 +56,9 @@ async def choose_answer(message: types.Message):
     for paragraph in paragraphs:
         await bot.send_message(chat_id=message.from_user.id, text=paragraph)
 
-@dp.callback_query_handler()
-async def answer(callback: CallbackQuery):
-    await callback.answer(text=callback.data)
+@dp.callback_query_handler(answer_data.filter())
+async def answer(callback: CallbackQuery, callback_data: dict):
+    await callback.answer(text=callback_data['subject'])
 
 if __name__ == '__main__':
     executor.start_polling(

@@ -1,10 +1,13 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, InlineKeyboardButton, InlineKeyboardMarkup
+from callback_data import *
+from aiogram.utils.callback_data import CallbackData
 import config
 
 class AnswerInlineKeyboard(InlineKeyboardMarkup):
 
     def __init__(self, row_width, count, subject):
         self.count = count
+        self.subject = subject
         super().__init__(self, row_width)
 
     def make_buttons(self):
@@ -13,7 +16,10 @@ class AnswerInlineKeyboard(InlineKeyboardMarkup):
             butts = []
             for k in a:
                 current = str(k)
-                butts.append(InlineKeyboardButton(text=current, callback_data=current))
+                butts.append(InlineKeyboardButton(text=current, callback_data=answer_data.new(
+                    subject = self.subject,
+                    id = k
+                )))
                 if k % 5 == 0:
                     break
             self.row(*butts)
