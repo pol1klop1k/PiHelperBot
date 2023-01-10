@@ -30,7 +30,7 @@ def get_answer(subject, id):
 
     cur = conn.cursor()
 
-    cur.execute(f"SELECT answer FROM questions WHERE question_id={id}")
+    cur.execute(f"SELECT answer FROM questions WHERE question_id={id} AND subject='{subject}'")
     answer = cur.fetchone()
 
     cur.close()

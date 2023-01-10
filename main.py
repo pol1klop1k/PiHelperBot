@@ -27,12 +27,11 @@ async def help_command(message: types.Message):
 @dp.message_handler(commands=['start'])
 async def start_command(message: types.Message):
     await message.delete()
-    await message.answer(text="Привет! Я бот помощник по учебному процессу")
 
     functional = SubjectsReplyKeyboard(config.subjects, resize_keyboard=True,one_time_keyboard=False)
     functional.make_buttons()
 
-    await message.answer(text='Вот список моих некоторых комманд', reply_markup=functional)
+    await message.answer(text='Привет, выбирай предмет!', reply_markup=functional)
 
 
 @dp.message_handler(lambda message: message.text in config.subjects)
@@ -44,15 +43,16 @@ async def choose_answer(message: types.Message):
     text = f'Какой вопрос по {config.declination[subj]} интересует?\n'
 
     await message.answer(text = text)
-
-    ikb = AnswerInlineKeyboard(5, 57, subj)
-    ikb.make_buttons()
-
+    
     #paragraphs = [f'{id}. {text}' for id, text in questions]
 
     for paragraph in questions:
         question_id, question_text = paragraph
-        button = InlineKeyboardButton(text="Получить ответ", callback_data=str(question_id))
+        button = InlineKeyboardButton(text="Получить ответ", callback_data=answer_data.new(
+            subject=subj,
+            id=question_id,
+            chat_id=message.from_user.id
+        ))
         ikb = InlineKeyboardMarkup(row_width=1).add(button)
         await bot.send_message(
             chat_id=message.from_user.id, 
@@ -61,7 +61,8 @@ async def choose_answer(message: types.Message):
 
 @dp.callback_query_handler(answer_data.filter())
 async def answer(callback: CallbackQuery, callback_data: dict):
-    await callback.answer(text=callback_data['subject'])
+    answer = info.get_answer(subject=callback_data['subject'], id=callback_data['id'])[0]
+    await bot.send_message(chat_id=callback_data['chat_id'],text=f'Вопрос №{callback_data["id"]}.\n{answer}')
 
 if __name__ == '__main__':
     executor.start_polling(
